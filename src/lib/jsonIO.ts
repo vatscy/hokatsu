@@ -89,20 +89,38 @@ export function defaultExportFileName(date = new Date()): string {
 
 const SHARE_PREFIX = 'v1:';
 
+// Chromium の (De)CompressionStream は readable を消費しないと writer.write/close が
+// バックプレッシャで待ち続けるため、書き込みと並行して readable をドレインする必要がある。
+// Node の実装ではこの問題が顕在化しないため Vitest だけでは検知できない。
 async function deflateRaw(data: BufferSource): Promise<Uint8Array<ArrayBuffer>> {
   const cs = new CompressionStream('deflate-raw');
-  const writer = cs.writable.getWriter();
-  await writer.write(data);
-  await writer.close();
-  return collectStream(cs.readable);
+  return pipeThroughTransform(cs, data);
 }
 
 async function inflateRaw(data: BufferSource): Promise<Uint8Array<ArrayBuffer>> {
   const ds = new DecompressionStream('deflate-raw');
-  const writer = ds.writable.getWriter();
-  await writer.write(data);
-  await writer.close();
-  return collectStream(ds.readable);
+  return pipeThroughTransform(ds, data);
+}
+
+async function pipeThroughTransform(
+  stream: CompressionStream | DecompressionStream,
+  data: BufferSource,
+): Promise<Uint8Array<ArrayBuffer>> {
+  const writer = stream.writable.getWriter();
+  // 不正データでストリームがエラーになると writer 側も reject するが、
+  // 失敗の伝播は readable 側のみに任せ、writer の reject は unhandledRejection を
+  // 出さないよう個別に握り潰す。
+  const writeDone = (async () => {
+    try {
+      await writer.write(data);
+      await writer.close();
+    } catch {
+      // readable 側の collectStream 内エラーとして拾わせる
+    }
+  })();
+  const result = await collectStream(stream.readable);
+  await writeDone;
+  return result;
 }
 
 async function collectStream(readable: ReadableStream<Uint8Array>): Promise<Uint8Array<ArrayBuffer>> {
