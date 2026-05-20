@@ -91,4 +91,32 @@ describe('useKindergartensStore', () => {
     await act(() => result.current.clearAll());
     expect(result.current.list).toHaveLength(0);
   });
+
+  it('getShareString: 圧縮文字列を返す', async () => {
+    const { result } = renderHook(() => useKindergartensStore());
+    await act(() => result.current.create({ name: '共有テスト園' }));
+    let str = '';
+    await act(async () => { str = await result.current.getShareString(); });
+    expect(str).toMatch(/^v1:/);
+  });
+
+  it('importFromShare: 共有文字列でlistを置換し件数を返す', async () => {
+    const { result } = renderHook(() => useKindergartensStore());
+    await act(() => result.current.create({ name: '既存園' }));
+    let shareStr = '';
+    await act(async () => {
+      await result.current.create({ name: '共有元園' });
+      shareStr = await result.current.getShareString();
+    });
+    await act(() => result.current.clearAll());
+    let ret = { count: 0 };
+    await act(async () => { ret = await result.current.importFromShare(shareStr); });
+    expect(ret.count).toBe(2);
+    expect(result.current.list).toHaveLength(2);
+  });
+
+  it('importFromShare: 不正な文字列はエラーをthrowする', async () => {
+    const { result } = renderHook(() => useKindergartensStore());
+    await expect(act(() => result.current.importFromShare('invalid'))).rejects.toThrow();
+  });
 });

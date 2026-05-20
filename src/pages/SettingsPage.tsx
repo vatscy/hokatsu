@@ -12,6 +12,8 @@ type Message = { type: 'info' | 'error'; text: string } | null;
 export function SettingsPage() {
   const exportJson = useKindergartensStore((s) => s.exportJson);
   const importJson = useKindergartensStore((s) => s.importJson);
+  const getShareString = useKindergartensStore((s) => s.getShareString);
+  const importFromShare = useKindergartensStore((s) => s.importFromShare);
   const clearAll = useKindergartensStore((s) => s.clearAll);
   const list = useKindergartensStore((s) => s.list);
   const loaded = useKindergartensStore((s) => s.loaded);
@@ -19,6 +21,7 @@ export function SettingsPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<Message>(null);
+  const [shareInput, setShareInput] = useState('');
 
   if (!loaded) {
     void load();
@@ -56,6 +59,42 @@ export function SettingsPage() {
       setMessage({ type: 'error', text });
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCopyShare = async () => {
+    setMessage(null);
+    try {
+      const text = await getShareString();
+      await navigator.clipboard.writeText(text);
+      setMessage({ type: 'info', text: `${list.length}件の共有文字列をコピーしました。` });
+    } catch (err) {
+      setMessage({ type: 'error', text: `コピー失敗: ${(err as Error).message}` });
+    }
+  };
+
+  const handleImportShare = async () => {
+    setMessage(null);
+    if (!shareInput.trim()) return;
+    if (
+      !window.confirm(
+        '現在のデータをすべて上書きしてインポートします。よろしいですか？',
+      )
+    ) {
+      return;
+    }
+    try {
+      const { count } = await importFromShare(shareInput.trim());
+      setMessage({ type: 'info', text: `${count}件をインポートしました。` });
+      setShareInput('');
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text:
+          err instanceof ImportFormatError
+            ? `インポート失敗: ${err.message}`
+            : `インポート失敗: ${(err as Error).message}`,
+      });
     }
   };
 
@@ -124,6 +163,40 @@ export function SettingsPage() {
         >
           JSON ファイルを選択
         </button>
+      </section>
+
+      <section className="rounded-lg border border-slate-200 bg-white p-4 mb-4">
+        <h2 className="font-semibold mb-2">文字列でデータ共有</h2>
+        <p className="text-sm text-slate-600 mb-3">
+          全データを圧縮した文字列でコピー・ペーストして端末間で共有できます。ファイルを使わずに別のブラウザへ移行できます。
+        </p>
+        <button
+          type="button"
+          onClick={handleCopyShare}
+          className="min-h-11 px-4 rounded-md bg-primary-600 text-white font-medium hover:bg-primary-700 mb-4"
+        >
+          共有文字列をコピー
+        </button>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            共有文字列を貼り付け（<code className="font-mono text-xs">v1:...</code> の形式）
+          </label>
+          <textarea
+            value={shareInput}
+            onChange={(e) => setShareInput(e.target.value)}
+            rows={3}
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="v1:..."
+          />
+          <button
+            type="button"
+            onClick={handleImportShare}
+            disabled={!shareInput.trim()}
+            className="mt-2 min-h-11 px-4 rounded-md border border-slate-300 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            貼り付けからインポート
+          </button>
+        </div>
       </section>
 
       <section className="rounded-lg border border-rose-200 bg-white p-4">

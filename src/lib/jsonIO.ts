@@ -84,3 +84,85 @@ export function defaultExportFileName(date = new Date()): string {
   const d = String(date.getDate()).padStart(2, '0');
   return `hokatsu-${y}${m}${d}.json`;
 }
+
+// ---- 共有文字列（deflate-raw 圧縮 + base64url）----
+
+const SHARE_PREFIX = 'v1:';
+
+async function deflateRaw(data: Uint8Array): Promise<Uint8Array> {
+  const cs = new CompressionStream('deflate-raw');
+  const writer = cs.writable.getWriter();
+  await writer.write(data);
+  await writer.close();
+  return collectStream(cs.readable);
+}
+
+async function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
+  const ds = new DecompressionStream('deflate-raw');
+  const writer = ds.writable.getWriter();
+  await writer.write(data);
+  await writer.close();
+  return collectStream(ds.readable);
+}
+
+async function collectStream(readable: ReadableStream<Uint8Array>): Promise<Uint8Array> {
+  const reader = readable.getReader();
+  const chunks: Uint8Array[] = [];
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+  }
+  const total = chunks.reduce((s, c) => s + c.length, 0);
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const c of chunks) {
+    out.set(c, offset);
+    offset += c.length;
+  }
+  return out;
+}
+
+function bytesToBase64url(bytes: Uint8Array): string {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 8192) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+function base64urlToBytes(str: string): Uint8Array {
+  let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = b64.length % 4;
+  if (pad === 2) b64 += '==';
+  else if (pad === 3) b64 += '=';
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+export async function compressToShareString(records: Kindergarten[]): Promise<string> {
+  const json = JSON.stringify(buildExportPayload(records));
+  const compressed = await deflateRaw(new TextEncoder().encode(json));
+  return SHARE_PREFIX + bytesToBase64url(compressed);
+}
+
+export async function decompressFromShareString(text: string): Promise<Kindergarten[]> {
+  if (!text.startsWith(SHARE_PREFIX)) {
+    throw new ImportFormatError(`共有文字列は "${SHARE_PREFIX}" で始まる必要があります`);
+  }
+  let bytes: Uint8Array;
+  try {
+    bytes = base64urlToBytes(text.slice(SHARE_PREFIX.length));
+  } catch {
+    throw new ImportFormatError('base64url のデコードに失敗しました');
+  }
+  let decompressed: Uint8Array;
+  try {
+    decompressed = await inflateRaw(bytes);
+  } catch {
+    throw new ImportFormatError('展開（inflate）に失敗しました（文字列が破損している可能性があります）');
+  }
+  return parseImport(new TextDecoder().decode(decompressed));
+}

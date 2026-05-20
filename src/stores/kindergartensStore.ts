@@ -4,6 +4,8 @@ import type { Kindergarten } from '../types/kindergarten';
 import {
   parseImport,
   serializeExport,
+  compressToShareString,
+  decompressFromShareString,
   type ExportPayload,
 } from '../lib/jsonIO';
 
@@ -29,6 +31,8 @@ interface KindergartensState {
 
   exportJson: () => Promise<string>;
   importJson: (text: string) => Promise<{ count: number }>;
+  getShareString: () => Promise<string>;
+  importFromShare: (text: string) => Promise<{ count: number }>;
   clearAll: () => Promise<void>;
 }
 
@@ -68,6 +72,17 @@ export const useKindergartensStore = create<KindergartensState>((set, get) => ({
 
   importJson: async (text) => {
     const records = parseImport(text);
+    const count = await kindergartenRepo.replaceAll(records);
+    set({ list: records, loaded: true });
+    return { count };
+  },
+
+  getShareString: async () => {
+    return compressToShareString(await kindergartenRepo.listAll());
+  },
+
+  importFromShare: async (text) => {
+    const records = await decompressFromShareString(text);
     const count = await kindergartenRepo.replaceAll(records);
     set({ list: records, loaded: true });
     return { count };
