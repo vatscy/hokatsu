@@ -41,7 +41,7 @@ export function RadioGroup<T extends string>({
               className={
                 'min-h-11 px-3 py-2 rounded-md border text-sm font-medium ' +
                 (active
-                  ? 'bg-sky-600 border-sky-600 text-white'
+                  ? 'bg-primary-600 border-primary-600 text-white'
                   : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50')
               }
             >
@@ -95,7 +95,7 @@ export function BoolRadioGroup({
               className={
                 'min-h-11 px-3 py-2 rounded-md border text-sm font-medium ' +
                 (active
-                  ? 'bg-sky-600 border-sky-600 text-white'
+                  ? 'bg-primary-600 border-primary-600 text-white'
                   : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50')
               }
             >

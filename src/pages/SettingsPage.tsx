@@ -81,7 +81,7 @@ export function SettingsPage() {
             'rounded-md border px-3 py-2 mb-4 text-sm ' +
             (message.type === 'error'
               ? 'border-rose-300 bg-rose-50 text-rose-700'
-              : 'border-sky-300 bg-sky-50 text-sky-800')
+              : 'border-primary-300 bg-primary-50 text-primary-800')
           }
         >
           {message.text}
@@ -96,7 +96,7 @@ export function SettingsPage() {
         <button
           type="button"
           onClick={handleExport}
-          className="min-h-11 px-4 rounded-md bg-sky-600 text-white font-medium hover:bg-sky-700"
+          className="min-h-11 px-4 rounded-md bg-primary-600 text-white font-medium hover:bg-primary-700"
         >
           JSON をダウンロード
         </button>

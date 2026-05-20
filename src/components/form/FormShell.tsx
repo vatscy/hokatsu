@@ -67,7 +67,7 @@ export function FormShell({ initial, submitLabel, onSubmit, onCancel, onDelete }
         <button
           type="button"
           onClick={submit}
-          className="ml-auto min-h-11 px-5 rounded-md bg-sky-600 text-white font-semibold hover:bg-sky-700 disabled:opacity-60"
+          className="ml-auto min-h-11 px-5 rounded-md bg-primary-600 text-white font-semibold hover:bg-primary-700 disabled:opacity-60"
           disabled={busy}
         >
           {busy ? '保存中...' : submitLabel}

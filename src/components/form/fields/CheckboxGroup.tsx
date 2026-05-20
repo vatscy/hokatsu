@@ -18,7 +18,7 @@ export function Checkbox({ label, checked = false, onChange, className }: CheckP
     >
       <input
         type="checkbox"
-        className="h-5 w-5 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+        className="h-5 w-5 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       />

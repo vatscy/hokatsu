@@ -31,7 +31,7 @@ export function ListPage() {
         <h1 className="text-xl font-bold">園一覧（{sorted.length}件）</h1>
         <Link
           to="/new"
-          className="min-h-11 px-4 py-2 rounded-md bg-sky-600 text-white font-semibold hover:bg-sky-700"
+          className="min-h-11 px-4 py-2 rounded-md bg-primary-600 text-white font-semibold hover:bg-primary-700"
         >
           ＋ 新規登録
         </Link>
