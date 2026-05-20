@@ -89,7 +89,7 @@ export function defaultExportFileName(date = new Date()): string {
 
 const SHARE_PREFIX = 'v1:';
 
-async function deflateRaw(data: Uint8Array): Promise<Uint8Array> {
+async function deflateRaw(data: BufferSource): Promise<Uint8Array<ArrayBuffer>> {
   const cs = new CompressionStream('deflate-raw');
   const writer = cs.writable.getWriter();
   await writer.write(data);
@@ -97,7 +97,7 @@ async function deflateRaw(data: Uint8Array): Promise<Uint8Array> {
   return collectStream(cs.readable);
 }
 
-async function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
+async function inflateRaw(data: BufferSource): Promise<Uint8Array<ArrayBuffer>> {
   const ds = new DecompressionStream('deflate-raw');
   const writer = ds.writable.getWriter();
   await writer.write(data);
@@ -105,7 +105,7 @@ async function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
   return collectStream(ds.readable);
 }
 
-async function collectStream(readable: ReadableStream<Uint8Array>): Promise<Uint8Array> {
+async function collectStream(readable: ReadableStream<Uint8Array>): Promise<Uint8Array<ArrayBuffer>> {
   const reader = readable.getReader();
   const chunks: Uint8Array[] = [];
   while (true) {
@@ -114,7 +114,7 @@ async function collectStream(readable: ReadableStream<Uint8Array>): Promise<Uint
     chunks.push(value);
   }
   const total = chunks.reduce((s, c) => s + c.length, 0);
-  const out = new Uint8Array(total);
+  const out = new Uint8Array(new ArrayBuffer(total));
   let offset = 0;
   for (const c of chunks) {
     out.set(c, offset);
@@ -131,13 +131,13 @@ function bytesToBase64url(bytes: Uint8Array): string {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-function base64urlToBytes(str: string): Uint8Array {
+function base64urlToBytes(str: string): Uint8Array<ArrayBuffer> {
   let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
   const pad = b64.length % 4;
   if (pad === 2) b64 += '==';
   else if (pad === 3) b64 += '=';
   const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
+  const bytes = new Uint8Array(new ArrayBuffer(binary.length));
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   return bytes;
 }
@@ -152,13 +152,13 @@ export async function decompressFromShareString(text: string): Promise<Kindergar
   if (!text.startsWith(SHARE_PREFIX)) {
     throw new ImportFormatError(`共有文字列は "${SHARE_PREFIX}" で始まる必要があります`);
   }
-  let bytes: Uint8Array;
+  let bytes: Uint8Array<ArrayBuffer>;
   try {
     bytes = base64urlToBytes(text.slice(SHARE_PREFIX.length));
   } catch {
     throw new ImportFormatError('base64url のデコードに失敗しました');
   }
-  let decompressed: Uint8Array;
+  let decompressed: Uint8Array<ArrayBuffer>;
   try {
     decompressed = await inflateRaw(bytes);
   } catch {
