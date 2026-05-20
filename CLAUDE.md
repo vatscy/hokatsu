@@ -56,7 +56,9 @@
 
 ## テスト実行の注意
 
-- `npm run test` はフォアグラウンドで timeout を **120 秒以上**に設定して実行する。`pool: 'forks'` 設定済みでも、まれに worker 起動が遅延して `Timeout waiting for worker to respond` エラーになる。その場合は再実行で通る。
+- `npm run test` はフォアグラウンドで実行する。所要時間はおおむね 10〜15 秒。
+- 設定で `pool: 'forks' + fileParallelism: false` を採用しているため、テストは単一 fork で順次実行される。Windows + Node 26 で Vitest 内部の `START_TIMEOUT (60s)` を fork の cold start が超えてしまう問題（旧設定では1回目が必ずタイムアウトしていた）への対処。並列度は犠牲だが、現状のテスト量では実テスト時間 1 秒未満なので体感への影響はない。
+- まれに（数十回に1回）長時間化したり flaky になることがある。再実行で通る。
 - Bash ツールでバックグラウンド実行する場合（`run_in_background: true`）、出力確認は `TaskOutput` ツールより **`Read` でファイルパスを直接読む方が確実**（TaskOutput スキーマのロードが不要になる）。
 
 ## テストの方針
