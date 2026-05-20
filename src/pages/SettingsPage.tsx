@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Container } from '../components/layout/Container';
 import {
   defaultExportFileName,
@@ -19,9 +20,18 @@ export function SettingsPage() {
   const loaded = useKindergartensStore((s) => s.loaded);
   const load = useKindergartensStore((s) => s.load);
 
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [message, setMessage] = useState<Message>(null);
   const [shareInput, setShareInput] = useState('');
+  const [copyState, setCopyState] = useState<'idle' | 'copying' | 'copied'>('idle');
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   if (!loaded) {
     void load();
@@ -63,12 +73,17 @@ export function SettingsPage() {
   };
 
   const handleCopyShare = async () => {
+    if (copyState !== 'idle') return;
+    if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current);
     setMessage(null);
+    setCopyState('copying');
     try {
       const text = await getShareString();
       await navigator.clipboard.writeText(text);
-      setMessage({ type: 'info', text: `${list.length}件の共有文字列をコピーしました。` });
+      setCopyState('copied');
+      copyTimerRef.current = setTimeout(() => setCopyState('idle'), 2000);
     } catch (err) {
+      setCopyState('idle');
       setMessage({ type: 'error', text: `コピー失敗: ${(err as Error).message}` });
     }
   };
@@ -84,9 +99,9 @@ export function SettingsPage() {
       return;
     }
     try {
-      const { count } = await importFromShare(shareInput.trim());
-      setMessage({ type: 'info', text: `${count}件をインポートしました。` });
+      await importFromShare(shareInput.trim());
       setShareInput('');
+      navigate('/');
     } catch (err) {
       setMessage({
         type: 'error',
@@ -173,9 +188,11 @@ export function SettingsPage() {
         <button
           type="button"
           onClick={handleCopyShare}
-          className="min-h-11 px-4 rounded-md bg-primary-600 text-white font-medium hover:bg-primary-700 mb-4"
+          disabled={copyState !== 'idle'}
+          aria-busy={copyState === 'copying'}
+          className="min-h-11 px-4 rounded-md bg-primary-600 text-white font-medium hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed mb-4"
         >
-          共有文字列をコピー
+          {copyState === 'copying' ? 'コピー中…' : copyState === 'copied' ? 'コピー完了' : '共有文字列をコピー'}
         </button>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">
