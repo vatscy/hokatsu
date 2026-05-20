@@ -1,0 +1,58 @@
+# 保活ノート — Claude 向けプロジェクトメモ
+
+## このプロジェクトの本質
+
+- 個人用 SPA。サーバなし。データはブラウザの IndexedDB のみ。
+- 現在は **Phase 1 (MVP)** に集中。PWA / オフライン / レーダーチャート / Google Drive 同期は Phase 2 以降のため、頼まれてもいないのに先取り提案しない。
+- 要求整理の一次情報は [doc/planning/requirements.md](doc/planning/requirements.md)。仕様判断で迷ったらまずこれを参照する。
+
+## 必ず守る規約
+
+- **ルーティングは HashRouter 固定**。GitHub Pages のサブパス配信でリロード 404 を避けるための採用なので、`BrowserRouter` への置換提案は禁止。
+- **配信ベースパスは `VITE_BASE_PATH` で制御**。`vite.config.ts` の `base` を直書きしない（GitHub Actions が自動注入する前提）。
+- **IndexedDB は `src/db/database.ts` の repository 経由**でのみ操作する。Dexie インスタンスを各コンポーネントから直接触らない。
+- **フォーム入力は [src/components/form/fields/](src/components/form/fields/) のプリミティブを再利用**。素の `<input>` を新規に書かない。
+- **紙の記録表とセクション構造を 1:1 対応**させる（[src/components/form/sections/](src/components/form/sections/)）。セクションの分割・統合は要求書側の構造変更が先。
+- **JSON インポートは「全件上書き」のみ**。マージ実装は Phase 3 まで凍結。
+
+## ディレクトリ責務
+
+- [src/types/](src/types/) — `Kindergarten` 型・定数
+- [src/db/](src/db/) — Dexie インスタンス + repository
+- [src/lib/](src/lib/) — id 生成 / スコア計算 / JSON I/O / フォーマット（純関数のみ）
+- [src/stores/](src/stores/) — Zustand ストア
+- [src/pages/](src/pages/) — ListPage / NewPage / EditPage / SettingsPage
+- [src/components/](src/components/) — layout / list / form
+
+## 日常コマンド
+
+| 用途 | コマンド |
+|---|---|
+| 開発サーバ | `npm run dev`（http://localhost:5173/） |
+| 型チェック | `npx tsc --noEmit` |
+| 単発テスト | `npm run test` |
+| 監視テスト | `npm run test:watch` |
+| 本番ビルド検証 | `npm run build` |
+| プレビュー | `npm run preview` |
+| E2E テスト | `npm run e2e`（Chromium、`webServer` で dev サーバ自動起動） |
+| E2E (UI モード) | `npm run e2e:ui` |
+
+## 完了の定義
+
+コード変更を「完了」と報告する前に、最低限以下を満たすこと:
+
+1. `npx tsc --noEmit` が通る
+2. `npm run test` が通る
+3. UI 変更を伴う場合は `npm run dev` で実ブラウザ動作を確認した旨を明示する（型・テストは UI 正しさを保証しない）
+
+## テストの方針
+
+- **ユニットテスト**: Vitest + Testing Library + jsdom。`src/**/*.test.ts(x)` をソースと同居配置。
+- IndexedDB を絡める場合は `fake-indexeddb`（[src/test/setup.ts](src/test/setup.ts) で有効化済み）。
+- `src/lib/` の純関数は積極的にテストを足す。
+- **E2E テスト**: Playwright（Chromium のみ）。[e2e/](e2e/) 配下に `*.spec.ts` で配置。
+  - Vitest と Playwright の住み分けは「拡張子」で行う:
+    - Vitest: `*.test.ts(x)` のみ（`e2e/` は Vitest の `exclude` に含めてある）
+    - Playwright: `*.spec.ts` のみ
+  - `npm run e2e` は dev サーバを自動起動するため、別途 `npm run dev` は不要。
+  - 初回のみブラウザバイナリを取得する必要あり: `npx playwright install chromium`。CI 導入時もこの 1 行が前提。

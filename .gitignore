@@ -41,3 +41,9 @@ vite.config.mjs.timestamp-*
 .env
 .env.local
 .env.*.local
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

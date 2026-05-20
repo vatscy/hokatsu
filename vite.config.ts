@@ -11,5 +11,6 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     pool: 'threads',
+    exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
   },
 });
