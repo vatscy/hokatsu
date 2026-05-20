@@ -15,11 +15,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '26'
           cache: 'npm'
-
-      - name: Upgrade npm
-        run: npm install -g npm@11
 
       - run: npm ci
 
