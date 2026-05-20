@@ -1,21 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Container } from '../components/layout/Container';
 import { KindergartenCard } from '../components/list/KindergartenCard';
 import { SortSelector } from '../components/list/SortSelector';
-import {
-  selectSortedList,
-  useKindergartensStore,
-} from '../stores/kindergartensStore';
+import { useKindergartensStore } from '../stores/kindergartensStore';
+import { compareKindergartens } from '../lib/scoring';
 
 export function ListPage() {
   const loaded = useKindergartensStore((s) => s.loaded);
   const load = useKindergartensStore((s) => s.load);
+  const list = useKindergartensStore((s) => s.list);
   const sortKey = useKindergartensStore((s) => s.sortKey);
   const sortDir = useKindergartensStore((s) => s.sortDir);
   const setSort = useKindergartensStore((s) => s.setSort);
   const remove = useKindergartensStore((s) => s.remove);
-  const sorted = useKindergartensStore(selectSortedList);
+
+  const sorted = useMemo(() => {
+    const next = [...list].sort((a, b) => compareKindergartens(a, b, sortKey));
+    if (sortDir === 'desc') next.reverse();
+    return next;
+  }, [list, sortKey, sortDir]);
 
   useEffect(() => {
     if (!loaded) void load();

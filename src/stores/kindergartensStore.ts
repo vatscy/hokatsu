@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { kindergartenRepo } from '../db/repository';
 import type { Kindergarten } from '../types/kindergarten';
-import { compareKindergartens } from '../lib/scoring';
 import {
   parseImport,
   serializeExport,
@@ -76,11 +75,3 @@ export const useKindergartensStore = create<KindergartensState>((set, get) => ({
 }));
 
 export type { ExportPayload };
-
-export function selectSortedList(state: KindergartensState): Kindergarten[] {
-  const sorted = [...state.list].sort((a, b) =>
-    compareKindergartens(a, b, state.sortKey),
-  );
-  if (state.sortDir === 'desc') sorted.reverse();
-  return sorted;
-}
