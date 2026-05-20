@@ -34,6 +34,7 @@ export function MiscSection({ value, onChange }: SectionProps) {
         value={value.freeMemo}
         onChange={(v) => onChange({ freeMemo: v })}
         rows={4}
+        placeholder="一時保育の有無、床暖の有無、特別な行事があるか等"
       />
 
       <div>

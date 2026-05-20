@@ -1,15 +1,16 @@
 // 保育園見学記録のデータモデル。
 // 紙の記録表（doc/planning/report.jpg）に準拠し、ほぼ全フィールドを optional/nullable で保持する。
 // 全項目空欄でも保存可能とするため、必須は id / createdAt / updatedAt のみ。
+// 各フィールドの形式・選択肢は doc/planning/requirements.md 4.1.1 を参照。
 
 export type Category = '公立' | '認可' | '認可外';
 
 export type Rating = 1 | 2 | 3 | 4 | 5 | null;
 
+// クラス定員 / 現在の空き人数 で共用。age は数値（才）、count は人数。
 export interface ClassCapacity {
-  age?: string;
+  age?: number | null;
   count?: number | null;
-  note?: string;
 }
 
 export interface CostItem {
@@ -31,14 +32,20 @@ export interface Impressions {
   principal: Rating; // 園長先生の印象
 }
 
+// 月日のみ。'MM-DD' 形式で保持。
+export interface ClosurePeriod {
+  from?: string;
+  to?: string;
+}
+
 export interface ClosurePeriods {
-  yearEnd?: string;
-  others?: string;
+  yearEnd?: ClosurePeriod;
+  others?: ClosurePeriod[];
 }
 
 export interface ExtendedCare {
+  // true: 申請制 / false: 不要
   applicationRequired?: boolean | null;
-  timeFrom?: string;
   timeTo?: string;
 }
 
@@ -60,16 +67,18 @@ export interface NearbyParkInfo {
 }
 
 export interface ClothingInfo {
-  uniformFrom1?: boolean;
-  uniformFrom3?: boolean;
+  uniform?: boolean; // 制服（親）
+  uniformFrom1?: boolean; // 制服 1才〜
+  uniformFrom3?: boolean; // 制服 3才〜
   privateClothes?: boolean;
   hatOnly?: boolean;
-  other?: string;
+  otherChecked?: boolean; // その他（親）
+  otherText?: string;
 }
 
 export interface LunchFee {
-  perMeal?: number | null;
-  perMonth?: number | null;
+  amount?: number | null;
+  unit?: '回' | '月' | null;
 }
 
 export interface BentoRequired {
@@ -82,6 +91,11 @@ export interface TrialCare {
   days?: number | null;
 }
 
+export interface ContactBook {
+  paper?: boolean;
+  app?: boolean;
+}
+
 export interface PickupCriteria {
   feverThreshold?: number | null;
   other?: string;
@@ -92,23 +106,29 @@ export interface ParentEvents {
   content?: string;
 }
 
+export interface SupplyRefill {
+  diaper?: boolean;
+  clothes?: boolean;
+  apron?: boolean;
+  other?: string;
+}
+
 export interface MorningTasks {
-  attendanceCheck?: '紙' | 'タブレット' | null;
+  attendanceChecked?: boolean; // 登園チェック（親）
+  attendanceMethod?: '紙' | 'タブレット' | null;
   tempCheck?: boolean;
   journalEntry?: boolean;
-  supplyRefill?: {
-    diaper?: boolean;
-    clothes?: boolean;
-    apron?: boolean;
-    other?: string;
-  };
-  other?: string;
+  supplyChecked?: boolean; // 備品補充（親）
+  supplyRefill?: SupplyRefill;
+  otherChecked?: boolean; // その他（親）
+  otherText?: string;
 }
 
 export interface Subscriptions {
   diaperYenPerMonth?: number | null;
   beddingYenPerMonth?: number | null;
-  other?: string;
+  otherLabel?: string;
+  otherYenPerMonth?: number | null;
 }
 
 export interface GuidePerson {
@@ -151,7 +171,7 @@ export interface Kindergarten {
   lunchFee?: LunchFee;
   bentoRequired?: BentoRequired;
   trialCare?: TrialCare;
-  contactBook?: '紙' | 'アプリ' | null;
+  contactBook?: ContactBook;
   pickupCriteria?: PickupCriteria;
   parentEvents?: ParentEvents;
   parentCouncil?: '当番制' | '希望制' | '指名制' | null;

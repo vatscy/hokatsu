@@ -78,7 +78,6 @@ export function BasicSection({ value, onChange }: SectionProps) {
         label="メモ"
         value={value.generalMemo}
         onChange={(v) => onChange({ generalMemo: v })}
-        placeholder="一時保育の有無、床暖の有無、特別な行事があるか等"
       />
     </Section>
   );

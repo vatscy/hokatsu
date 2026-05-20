@@ -3,6 +3,7 @@ import { RadioGroup } from '../fields/RadioGroup';
 import { RepeatableRows } from '../fields/RepeatableRows';
 import { TextField } from '../fields/TextField';
 import { Section } from '../Section';
+import { labelClass } from '../fields/fieldStyles';
 import type { SectionProps } from './sectionTypes';
 
 const DIAPER_OPTIONS = [
@@ -35,46 +36,67 @@ export function CostSection({ value, onChange }: SectionProps) {
               value={row.amountYen}
               onChange={(v) => update({ amountYen: v })}
               suffix="円"
+              min={0}
             />
           </>
         )}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <NumberField
-          label="サブスク：おむつ"
-          value={subs.diaperYenPerMonth}
-          onChange={(v) =>
-            onChange({ subscriptions: { ...subs, diaperYenPerMonth: v } })
-          }
-          suffix="円 / 月"
-        />
-        <NumberField
-          label="サブスク：布団類"
-          value={subs.beddingYenPerMonth}
-          onChange={(v) =>
-            onChange({ subscriptions: { ...subs, beddingYenPerMonth: v } })
-          }
-          suffix="円 / 月"
-        />
+      <div>
+        <span className={labelClass}>サブスクできるもの</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <NumberField
+            label="おむつ"
+            value={subs.diaperYenPerMonth}
+            onChange={(v) =>
+              onChange({ subscriptions: { ...subs, diaperYenPerMonth: v } })
+            }
+            suffix="円 / 月"
+            min={0}
+          />
+          <NumberField
+            label="布団類"
+            value={subs.beddingYenPerMonth}
+            onChange={(v) =>
+              onChange({ subscriptions: { ...subs, beddingYenPerMonth: v } })
+            }
+            suffix="円 / 月"
+            min={0}
+          />
+          <TextField
+            label="その他（名称）"
+            value={subs.otherLabel}
+            onChange={(v) =>
+              onChange({ subscriptions: { ...subs, otherLabel: v } })
+            }
+          />
+          <NumberField
+            label="その他（金額）"
+            value={subs.otherYenPerMonth}
+            onChange={(v) =>
+              onChange({ subscriptions: { ...subs, otherYenPerMonth: v } })
+            }
+            suffix="円 / 月"
+            min={0}
+          />
+        </div>
       </div>
-      <TextField
-        label="サブスク：その他"
-        value={subs.other}
-        onChange={(v) => onChange({ subscriptions: { ...subs, other: v } })}
-      />
 
-      <RadioGroup
-        label="おむつの処分"
-        value={value.diaperDisposal ?? null}
-        onChange={(v) => onChange({ diaperDisposal: v })}
-        options={DIAPER_OPTIONS}
-      />
-      <TextField
-        label="おむつ処分（その他詳細）"
-        value={value.diaperDisposalOther}
-        onChange={(v) => onChange({ diaperDisposalOther: v })}
-      />
+      <div className="space-y-2">
+        <RadioGroup
+          label="おむつの処分"
+          value={value.diaperDisposal ?? null}
+          onChange={(v) => onChange({ diaperDisposal: v })}
+          options={DIAPER_OPTIONS}
+        />
+        {value.diaperDisposal === 'その他' && (
+          <TextField
+            label="おむつ処分（その他詳細）"
+            value={value.diaperDisposalOther}
+            onChange={(v) => onChange({ diaperDisposalOther: v })}
+          />
+        )}
+      </div>
     </Section>
   );
 }

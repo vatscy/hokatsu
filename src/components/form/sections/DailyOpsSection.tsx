@@ -5,20 +5,20 @@ import { TextField } from '../fields/TextField';
 import { Section } from '../Section';
 import type { SectionProps } from './sectionTypes';
 
-const CONTACT_BOOK_OPTIONS = [
-  { value: '紙', label: '紙' },
-  { value: 'アプリ', label: 'アプリ' },
-] as const;
-
 const PARENT_COUNCIL_OPTIONS = [
   { value: '当番制', label: '当番制' },
   { value: '希望制', label: '希望制' },
   { value: '指名制', label: '指名制' },
 ] as const;
 
-const ATTENDANCE_OPTIONS = [
+const ATTENDANCE_METHOD_OPTIONS = [
   { value: '紙', label: '紙' },
   { value: 'タブレット', label: 'タブレット' },
+] as const;
+
+const LUNCH_UNIT_OPTIONS = [
+  { value: '回', label: '回' },
+  { value: '月', label: '月' },
 ] as const;
 
 export function DailyOpsSection({ value, onChange }: SectionProps) {
@@ -26,6 +26,7 @@ export function DailyOpsSection({ value, onChange }: SectionProps) {
   const lunchFee = value.lunchFee ?? {};
   const bento = value.bentoRequired ?? {};
   const trial = value.trialCare ?? {};
+  const contact = value.contactBook ?? {};
   const pickup = value.pickupCriteria ?? {};
   const events = value.parentEvents ?? {};
   const morning = value.morningTasks ?? {};
@@ -33,48 +34,75 @@ export function DailyOpsSection({ value, onChange }: SectionProps) {
 
   return (
     <Section title="日常運用">
-      <CheckboxGroup label="服装">
-        <Checkbox
-          label="制服（1才～）"
-          checked={clothing.uniformFrom1 ?? false}
-          onChange={(v) => onChange({ clothing: { ...clothing, uniformFrom1: v } })}
-        />
-        <Checkbox
-          label="制服（3才～）"
-          checked={clothing.uniformFrom3 ?? false}
-          onChange={(v) => onChange({ clothing: { ...clothing, uniformFrom3: v } })}
-        />
-        <Checkbox
-          label="私服"
-          checked={clothing.privateClothes ?? false}
-          onChange={(v) =>
-            onChange({ clothing: { ...clothing, privateClothes: v } })
-          }
-        />
-        <Checkbox
-          label="帽子のみ"
-          checked={clothing.hatOnly ?? false}
-          onChange={(v) => onChange({ clothing: { ...clothing, hatOnly: v } })}
-        />
-      </CheckboxGroup>
-      <TextField
-        label="服装（その他）"
-        value={clothing.other}
-        onChange={(v) => onChange({ clothing: { ...clothing, other: v } })}
-      />
+      <div className="space-y-2">
+        <CheckboxGroup label="服装">
+          <Checkbox
+            label="制服"
+            checked={clothing.uniform ?? false}
+            onChange={(v) => onChange({ clothing: { ...clothing, uniform: v } })}
+          />
+          <Checkbox
+            label="私服"
+            checked={clothing.privateClothes ?? false}
+            onChange={(v) =>
+              onChange({ clothing: { ...clothing, privateClothes: v } })
+            }
+          />
+          <Checkbox
+            label="帽子のみ"
+            checked={clothing.hatOnly ?? false}
+            onChange={(v) => onChange({ clothing: { ...clothing, hatOnly: v } })}
+          />
+          <Checkbox
+            label="その他"
+            checked={clothing.otherChecked ?? false}
+            onChange={(v) =>
+              onChange({ clothing: { ...clothing, otherChecked: v } })
+            }
+          />
+        </CheckboxGroup>
+        {clothing.uniform && (
+          <CheckboxGroup label="制服の年齢区分">
+            <Checkbox
+              label="1才〜"
+              checked={clothing.uniformFrom1 ?? false}
+              onChange={(v) =>
+                onChange({ clothing: { ...clothing, uniformFrom1: v } })
+              }
+            />
+            <Checkbox
+              label="3才〜"
+              checked={clothing.uniformFrom3 ?? false}
+              onChange={(v) =>
+                onChange({ clothing: { ...clothing, uniformFrom3: v } })
+              }
+            />
+          </CheckboxGroup>
+        )}
+        {clothing.otherChecked && (
+          <TextField
+            label="服装（その他詳細）"
+            value={clothing.otherText}
+            onChange={(v) =>
+              onChange({ clothing: { ...clothing, otherText: v } })
+            }
+          />
+        )}
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
         <NumberField
-          label="給食費（1回）"
-          value={lunchFee.perMeal}
-          onChange={(v) => onChange({ lunchFee: { ...lunchFee, perMeal: v } })}
-          suffix="円 / 回"
+          label="給食費"
+          value={lunchFee.amount}
+          onChange={(v) => onChange({ lunchFee: { ...lunchFee, amount: v } })}
+          suffix="円"
+          min={0}
         />
-        <NumberField
-          label="給食費（月額）"
-          value={lunchFee.perMonth}
-          onChange={(v) => onChange({ lunchFee: { ...lunchFee, perMonth: v } })}
-          suffix="円 / 月"
+        <RadioGroup
+          label="単位"
+          value={lunchFee.unit ?? null}
+          onChange={(v) => onChange({ lunchFee: { ...lunchFee, unit: v } })}
+          options={LUNCH_UNIT_OPTIONS}
         />
       </div>
 
@@ -84,14 +112,16 @@ export function DailyOpsSection({ value, onChange }: SectionProps) {
           value={bento.required}
           onChange={(v) => onChange({ bentoRequired: { ...bento, required: v } })}
         />
-        <TextField
-          label="頻度"
-          value={bento.frequency}
-          onChange={(v) =>
-            onChange({ bentoRequired: { ...bento, frequency: v } })
-          }
-          placeholder="例: 月1, 行事日のみ"
-        />
+        {bento.required === true && (
+          <TextField
+            label="頻度"
+            value={bento.frequency}
+            onChange={(v) =>
+              onChange({ bentoRequired: { ...bento, frequency: v } })
+            }
+            placeholder="例: 月1, 行事日のみ"
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
@@ -100,20 +130,29 @@ export function DailyOpsSection({ value, onChange }: SectionProps) {
           value={trial.exists}
           onChange={(v) => onChange({ trialCare: { ...trial, exists: v } })}
         />
-        <NumberField
-          label="日数"
-          value={trial.days}
-          onChange={(v) => onChange({ trialCare: { ...trial, days: v } })}
-          suffix="日"
-        />
+        {trial.exists === true && (
+          <NumberField
+            label="日数"
+            value={trial.days}
+            onChange={(v) => onChange({ trialCare: { ...trial, days: v } })}
+            suffix="日"
+            min={0}
+          />
+        )}
       </div>
 
-      <RadioGroup
-        label="連絡帳"
-        value={value.contactBook ?? null}
-        onChange={(v) => onChange({ contactBook: v })}
-        options={CONTACT_BOOK_OPTIONS}
-      />
+      <CheckboxGroup label="連絡帳">
+        <Checkbox
+          label="紙"
+          checked={contact.paper ?? false}
+          onChange={(v) => onChange({ contactBook: { ...contact, paper: v } })}
+        />
+        <Checkbox
+          label="アプリ"
+          checked={contact.app ?? false}
+          onChange={(v) => onChange({ contactBook: { ...contact, app: v } })}
+        />
+      </CheckboxGroup>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <NumberField
@@ -142,6 +181,7 @@ export function DailyOpsSection({ value, onChange }: SectionProps) {
             onChange({ parentEvents: { ...events, perYear: v } })
           }
           suffix="回 / 年"
+          min={0}
         />
         <TextField
           label="内容"
@@ -160,15 +200,14 @@ export function DailyOpsSection({ value, onChange }: SectionProps) {
       />
 
       <div className="space-y-2">
-        <RadioGroup
-          label="朝やること：登園チェック"
-          value={morning.attendanceCheck ?? null}
-          onChange={(v) =>
-            onChange({ morningTasks: { ...morning, attendanceCheck: v } })
-          }
-          options={ATTENDANCE_OPTIONS}
-        />
         <CheckboxGroup label="朝やること">
+          <Checkbox
+            label="登園チェック"
+            checked={morning.attendanceChecked ?? false}
+            onChange={(v) =>
+              onChange({ morningTasks: { ...morning, attendanceChecked: v } })
+            }
+          />
           <Checkbox
             label="検温"
             checked={morning.tempCheck ?? false}
@@ -183,64 +222,97 @@ export function DailyOpsSection({ value, onChange }: SectionProps) {
               onChange({ morningTasks: { ...morning, journalEntry: v } })
             }
           />
-        </CheckboxGroup>
-        <CheckboxGroup label="備品補充">
           <Checkbox
-            label="おむつ"
-            checked={refill.diaper ?? false}
+            label="備品補充"
+            checked={morning.supplyChecked ?? false}
             onChange={(v) =>
-              onChange({
-                morningTasks: {
-                  ...morning,
-                  supplyRefill: { ...refill, diaper: v },
-                },
-              })
+              onChange({ morningTasks: { ...morning, supplyChecked: v } })
             }
           />
           <Checkbox
-            label="着替え"
-            checked={refill.clothes ?? false}
+            label="その他"
+            checked={morning.otherChecked ?? false}
             onChange={(v) =>
-              onChange({
-                morningTasks: {
-                  ...morning,
-                  supplyRefill: { ...refill, clothes: v },
-                },
-              })
-            }
-          />
-          <Checkbox
-            label="エプロン類"
-            checked={refill.apron ?? false}
-            onChange={(v) =>
-              onChange({
-                morningTasks: {
-                  ...morning,
-                  supplyRefill: { ...refill, apron: v },
-                },
-              })
+              onChange({ morningTasks: { ...morning, otherChecked: v } })
             }
           />
         </CheckboxGroup>
-        <TextField
-          label="備品補充（その他）"
-          value={refill.other}
-          onChange={(v) =>
-            onChange({
-              morningTasks: {
-                ...morning,
-                supplyRefill: { ...refill, other: v },
-              },
-            })
-          }
-        />
-        <TextField
-          label="朝やること（その他）"
-          value={morning.other}
-          onChange={(v) =>
-            onChange({ morningTasks: { ...morning, other: v } })
-          }
-        />
+
+        {morning.attendanceChecked && (
+          <RadioGroup
+            label="登園チェック 手段"
+            value={morning.attendanceMethod ?? null}
+            onChange={(v) =>
+              onChange({ morningTasks: { ...morning, attendanceMethod: v } })
+            }
+            options={ATTENDANCE_METHOD_OPTIONS}
+          />
+        )}
+
+        {morning.supplyChecked && (
+          <div className="space-y-2">
+            <CheckboxGroup label="備品補充の内訳">
+              <Checkbox
+                label="おむつ"
+                checked={refill.diaper ?? false}
+                onChange={(v) =>
+                  onChange({
+                    morningTasks: {
+                      ...morning,
+                      supplyRefill: { ...refill, diaper: v },
+                    },
+                  })
+                }
+              />
+              <Checkbox
+                label="着替え"
+                checked={refill.clothes ?? false}
+                onChange={(v) =>
+                  onChange({
+                    morningTasks: {
+                      ...morning,
+                      supplyRefill: { ...refill, clothes: v },
+                    },
+                  })
+                }
+              />
+              <Checkbox
+                label="エプロン類"
+                checked={refill.apron ?? false}
+                onChange={(v) =>
+                  onChange({
+                    morningTasks: {
+                      ...morning,
+                      supplyRefill: { ...refill, apron: v },
+                    },
+                  })
+                }
+              />
+            </CheckboxGroup>
+            <TextField
+              label="備品補充（他）"
+              value={refill.other}
+              onChange={(v) =>
+                onChange({
+                  morningTasks: {
+                    ...morning,
+                    supplyRefill: { ...refill, other: v },
+                  },
+                })
+              }
+            />
+          </div>
+        )}
+
+        {morning.otherChecked && (
+          <TextField
+            label="朝やること（その他詳細）"
+            value={morning.otherText}
+            onChange={(v) =>
+              onChange({ morningTasks: { ...morning, otherText: v } })
+            }
+          />
+        )}
       </div>
     </Section>
   );
