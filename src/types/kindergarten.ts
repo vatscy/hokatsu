@@ -147,6 +147,8 @@ export interface Kindergarten {
   category?: Category | null;
   distanceFromHomeKm?: number | null;
   distanceFromHomeMin?: number | null;
+  distanceFromStationKm?: number | null;
+  distanceFromStationMin?: number | null;
   distanceFromWorkKm?: number | null;
   distanceFromWorkMin?: number | null;
   generalMemo?: string;
@@ -159,16 +161,20 @@ export interface Kindergarten {
   extendedCare?: ExtendedCare;
   classCapacities?: ClassCapacity[];
   vacancies?: ClassCapacity[];
+  operationMemo?: string;
 
   // --- 施設 ---
   yard?: YardInfo;
   outings?: OutingsInfo;
   nearbyPark?: NearbyParkInfo;
   pool?: boolean | null;
+  bikeParking?: boolean | null;
+  facilityMemo?: string;
 
   // --- 日常運用 ---
   clothing?: ClothingInfo;
   lunchFee?: LunchFee;
+  inHouseLunch?: boolean | null;
   bentoRequired?: BentoRequired;
   trialCare?: TrialCare;
   contactBook?: ContactBook;
@@ -176,20 +182,23 @@ export interface Kindergarten {
   parentEvents?: ParentEvents;
   parentCouncil?: '当番制' | '希望制' | '指名制' | null;
   morningTasks?: MorningTasks;
-
-  // --- 園内活動 ---
   lessons?: string;
   handmadeItems?: string;
+  bedding?: string;
+  sns?: string;
+  dailyOperationMemo?: string;
 
   // --- 費用 ---
   monthlyCosts?: CostItem[];
   subscriptions?: Subscriptions;
   diaperDisposal?: '園にて処分' | '持ち帰り' | 'その他' | null;
   diaperDisposalOther?: string;
+  costMemo?: string;
 
   // --- 人物 ---
   guide?: GuidePerson;
   impressions?: Impressions;
+  peopleMemo?: string;
 
   // --- その他 ---
   freeMemo?: string;

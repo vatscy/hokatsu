@@ -10,6 +10,8 @@ const KEY_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'visitedAt', label: '見学日' },
   { value: 'averageImpression', label: '印象評価平均' },
   { value: 'name', label: '園名' },
+  { value: 'distanceFromHomeKm', label: '家からの距離 (km)' },
+  { value: 'distanceFromHomeMin', label: '家からの時間 (分)' },
 ];
 
 export function SortSelector({ sortKey, sortDir, onChange }: Props) {

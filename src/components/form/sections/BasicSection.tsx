@@ -61,6 +61,19 @@ export function BasicSection({ value, onChange }: SectionProps) {
           suffix="分"
         />
         <NumberField
+          label="駅から（距離）"
+          value={value.distanceFromStationKm}
+          onChange={(v) => onChange({ distanceFromStationKm: v })}
+          suffix="km"
+          step={0.1}
+        />
+        <NumberField
+          label="駅から（時間）"
+          value={value.distanceFromStationMin}
+          onChange={(v) => onChange({ distanceFromStationMin: v })}
+          suffix="分"
+        />
+        <NumberField
           label="会社から（距離）"
           value={value.distanceFromWorkKm}
           onChange={(v) => onChange({ distanceFromWorkKm: v })}

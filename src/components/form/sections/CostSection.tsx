@@ -1,6 +1,7 @@
 import { NumberField } from '../fields/NumberField';
 import { RadioGroup } from '../fields/RadioGroup';
 import { RepeatableRows } from '../fields/RepeatableRows';
+import { TextArea } from '../fields/TextArea';
 import { TextField } from '../fields/TextField';
 import { Section } from '../Section';
 import { labelClass } from '../fields/fieldStyles';
@@ -97,6 +98,12 @@ export function CostSection({ value, onChange }: SectionProps) {
           />
         )}
       </div>
+
+      <TextArea
+        label="メモ"
+        value={value.costMemo}
+        onChange={(v) => onChange({ costMemo: v })}
+      />
     </Section>
   );
 }

@@ -4,7 +4,6 @@ import { BasicSection } from './sections/BasicSection';
 import { OperationSection } from './sections/OperationSection';
 import { FacilitySection } from './sections/FacilitySection';
 import { DailyOpsSection } from './sections/DailyOpsSection';
-import { ActivitiesSection } from './sections/ActivitiesSection';
 import { CostSection } from './sections/CostSection';
 import { PeopleSection } from './sections/PeopleSection';
 import { MiscSection } from './sections/MiscSection';
@@ -40,7 +39,6 @@ export function FormShell({ initial, submitLabel, onSubmit, onCancel, onDelete }
       <OperationSection value={value} onChange={patch} />
       <FacilitySection value={value} onChange={patch} />
       <DailyOpsSection value={value} onChange={patch} />
-      <ActivitiesSection value={value} onChange={patch} />
       <CostSection value={value} onChange={patch} />
       <PeopleSection value={value} onChange={patch} />
       <MiscSection value={value} onChange={patch} />

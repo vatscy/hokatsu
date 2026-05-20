@@ -1,6 +1,7 @@
 import { BoolRadioGroup, RadioGroup } from '../fields/RadioGroup';
 import { Checkbox, CheckboxGroup } from '../fields/CheckboxGroup';
 import { NumberField } from '../fields/NumberField';
+import { TextArea } from '../fields/TextArea';
 import { TextField } from '../fields/TextField';
 import { Section } from '../Section';
 import type { SectionProps } from './sectionTypes';
@@ -105,6 +106,12 @@ export function DailyOpsSection({ value, onChange }: SectionProps) {
           options={LUNCH_UNIT_OPTIONS}
         />
       </div>
+
+      <BoolRadioGroup
+        label="給食の自園調理"
+        value={value.inHouseLunch}
+        onChange={(v) => onChange({ inHouseLunch: v })}
+      />
 
       <div className="space-y-2">
         <BoolRadioGroup
@@ -314,6 +321,36 @@ export function DailyOpsSection({ value, onChange }: SectionProps) {
           />
         )}
       </div>
+
+      <TextArea
+        label="園内の習い事"
+        value={value.lessons}
+        onChange={(v) => onChange({ lessons: v })}
+      />
+      <TextArea
+        label="手作りが必要なもの"
+        value={value.handmadeItems}
+        onChange={(v) => onChange({ handmadeItems: v })}
+      />
+
+      <TextField
+        label="布団"
+        value={value.bedding}
+        onChange={(v) => onChange({ bedding: v })}
+        placeholder="例: 持参 / レンタル（◯◯円/月）/ サイズ指定あり"
+      />
+      <TextField
+        label="SNS"
+        value={value.sns}
+        onChange={(v) => onChange({ sns: v })}
+        placeholder="例: Instagram @xxxxx / 公式LINEあり"
+      />
+
+      <TextArea
+        label="メモ"
+        value={value.dailyOperationMemo}
+        onChange={(v) => onChange({ dailyOperationMemo: v })}
+      />
     </Section>
   );
 }

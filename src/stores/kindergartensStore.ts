@@ -7,7 +7,12 @@ import {
   type ExportPayload,
 } from '../lib/jsonIO';
 
-export type SortKey = 'visitedAt' | 'averageImpression' | 'name';
+export type SortKey =
+  | 'visitedAt'
+  | 'averageImpression'
+  | 'name'
+  | 'distanceFromHomeKm'
+  | 'distanceFromHomeMin';
 export type SortDir = 'asc' | 'desc';
 
 interface KindergartensState {

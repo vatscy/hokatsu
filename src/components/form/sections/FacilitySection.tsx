@@ -1,6 +1,7 @@
 import { BoolRadioGroup, RadioGroup } from '../fields/RadioGroup';
 import { NumberField } from '../fields/NumberField';
 import { Checkbox, CheckboxGroup } from '../fields/CheckboxGroup';
+import { TextArea } from '../fields/TextArea';
 import { Section } from '../Section';
 import type { SectionProps } from './sectionTypes';
 
@@ -101,6 +102,18 @@ export function FacilitySection({ value, onChange }: SectionProps) {
         label="プール"
         value={value.pool}
         onChange={(v) => onChange({ pool: v })}
+      />
+
+      <BoolRadioGroup
+        label="駐輪場"
+        value={value.bikeParking}
+        onChange={(v) => onChange({ bikeParking: v })}
+      />
+
+      <TextArea
+        label="メモ"
+        value={value.facilityMemo}
+        onChange={(v) => onChange({ facilityMemo: v })}
       />
     </Section>
   );

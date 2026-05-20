@@ -22,16 +22,29 @@ export function isRating(v: unknown): v is Rating {
   return v === null || v === 1 || v === 2 || v === 3 || v === 4 || v === 5;
 }
 
+export type CompareKey =
+  | 'visitedAt'
+  | 'averageImpression'
+  | 'name'
+  | 'distanceFromHomeKm'
+  | 'distanceFromHomeMin';
+
 export function compareKindergartens(
   a: Kindergarten,
   b: Kindergarten,
-  key: 'visitedAt' | 'averageImpression' | 'name',
+  key: CompareKey,
 ): number {
   if (key === 'name') {
     return (a.name ?? '').localeCompare(b.name ?? '', 'ja');
   }
   if (key === 'visitedAt') {
     return compareNullableString(a.visitedAt, b.visitedAt);
+  }
+  if (key === 'distanceFromHomeKm') {
+    return compareNullableNumber(a.distanceFromHomeKm ?? null, b.distanceFromHomeKm ?? null);
+  }
+  if (key === 'distanceFromHomeMin') {
+    return compareNullableNumber(a.distanceFromHomeMin ?? null, b.distanceFromHomeMin ?? null);
   }
   // averageImpression
   return compareNullableNumber(averageImpression(a.impressions), averageImpression(b.impressions));

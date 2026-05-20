@@ -1,6 +1,7 @@
 import { IMPRESSION_KEYS, IMPRESSION_LABELS, type Impressions } from '../../../types/kindergarten';
 import { Rating5 } from '../fields/Rating5';
 import { RadioGroup } from '../fields/RadioGroup';
+import { TextArea } from '../fields/TextArea';
 import { TextField } from '../fields/TextField';
 import { Section } from '../Section';
 import type { SectionProps } from './sectionTypes';
@@ -50,6 +51,12 @@ export function PeopleSection({ value, onChange }: SectionProps) {
           />
         ))}
       </div>
+
+      <TextArea
+        label="メモ"
+        value={value.peopleMemo}
+        onChange={(v) => onChange({ peopleMemo: v })}
+      />
     </Section>
   );
 }

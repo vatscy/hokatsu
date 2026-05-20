@@ -1,6 +1,7 @@
 import { BoolRadioGroup } from '../fields/RadioGroup';
 import { NumberField } from '../fields/NumberField';
 import { RepeatableRows } from '../fields/RepeatableRows';
+import { TextArea } from '../fields/TextArea';
 import { TextField } from '../fields/TextField';
 import { TimeField } from '../fields/TimeField';
 import { Section } from '../Section';
@@ -154,6 +155,12 @@ export function OperationSection({ value, onChange }: SectionProps) {
             />
           </>
         )}
+      />
+
+      <TextArea
+        label="メモ"
+        value={value.operationMemo}
+        onChange={(v) => onChange({ operationMemo: v })}
       />
     </Section>
   );
