@@ -97,7 +97,7 @@ describe('useKindergartensStore', () => {
     await act(() => result.current.create({ name: '共有テスト園' }));
     let str = '';
     await act(async () => { str = await result.current.getShareString(); });
-    expect(str).toMatch(/^v1:/);
+    expect(str).toMatch(/^h1:/);
   });
 
   it('importFromShare: 共有文字列でlistを置換し件数を返す', async () => {

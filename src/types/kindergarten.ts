@@ -18,7 +18,7 @@ export interface CostItem {
   amountYen?: number | null;
 }
 
-// 7..19 の各時間帯ごとの自由記述（Phase 1 簡略版）
+// 7..19 の各時間帯ごとの自由記述（v1 簡略版）
 export interface ScheduleSlot {
   hour: number;
   text?: string;

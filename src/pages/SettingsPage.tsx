@@ -173,7 +173,7 @@ export function SettingsPage() {
       <section className="rounded-lg border border-slate-200 bg-white p-4 mb-4">
         <h2 className="font-semibold mb-2">インポート（全件上書き）</h2>
         <p className="text-sm text-slate-600 mb-3">
-          JSON ファイルから読み込みます。<strong className="text-rose-600">既存データはすべて上書き</strong>されます（Phase 1 仕様）。
+          JSON ファイルから読み込みます。<strong className="text-rose-600">既存データはすべて上書き</strong>されます（v1 仕様）。
         </p>
         <input
           ref={fileInputRef}
@@ -210,14 +210,14 @@ export function SettingsPage() {
         </button>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">
-            共有文字列を貼り付け（<code className="font-mono text-xs">v1:...</code> の形式）
+            共有文字列を貼り付け（<code className="font-mono text-xs">h1:...</code> の形式）
           </label>
           <textarea
             value={shareInput}
             onChange={(e) => setShareInput(e.target.value)}
             rows={3}
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary-500"
-            placeholder="v1:..."
+            placeholder="h1:..."
           />
           <button
             type="button"

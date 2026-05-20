@@ -3,7 +3,7 @@
 ## このプロジェクトの本質
 
 - 個人用 SPA。サーバなし。データはブラウザの IndexedDB のみ。
-- 現在は **Phase 1 (MVP)** に集中。PWA / オフライン / レーダーチャート / Google Drive 同期は Phase 2 以降のため、頼まれてもいないのに先取り提案しない。
+- 現在は **v1 (MVP)** に集中。PWA / オフライン / レーダーチャート / Google Drive 同期は v2 以降のため、頼まれてもいないのに先取り提案しない。
 - 要求整理の一次情報は [doc/planning/requirements.md](doc/planning/requirements.md)。仕様判断で迷ったらまずこれを参照する。
 
 ## 必ず守る規約
@@ -13,7 +13,7 @@
 - **IndexedDB は `src/db/database.ts` の repository 経由**でのみ操作する。Dexie インスタンスを各コンポーネントから直接触らない。
 - **フォーム入力は [src/components/form/fields/](src/components/form/fields/) のプリミティブを再利用**。素の `<input>` を新規に書かない。
 - **紙の記録表とセクション構造を 1:1 対応**させる（[src/components/form/sections/](src/components/form/sections/)）。セクションの分割・統合は要求書側の構造変更が先。
-- **JSON インポートは「全件上書き」のみ**。マージ実装は Phase 3 まで凍結。
+- **JSON インポートは「全件上書き」のみ**。マージ実装は v3 まで凍結。
 
 ## ディレクトリ責務
 

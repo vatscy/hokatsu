@@ -98,7 +98,7 @@ describe('defaultExportFileName', () => {
 describe('compressToShareString / decompressFromShareString', () => {
   it('空配列のラウンドトリップが成功する', async () => {
     const str = await compressToShareString([]);
-    expect(str).toMatch(/^v1:/);
+    expect(str).toMatch(/^h1:/);
     expect(await decompressFromShareString(str)).toEqual([]);
   });
 
@@ -121,18 +121,18 @@ describe('compressToShareString / decompressFromShareString', () => {
     expect(result[1].distanceFromHomeKm).toBe(1.5);
   });
 
-  it('v1: プレフィックスなしは ImportFormatError をスローする', async () => {
+  it('h1: プレフィックスなしは ImportFormatError をスローする', async () => {
     await expect(decompressFromShareString('invalid')).rejects.toThrow(ImportFormatError);
-    await expect(decompressFromShareString('v2:abc')).rejects.toThrow(ImportFormatError);
+    await expect(decompressFromShareString('v1:abc')).rejects.toThrow(ImportFormatError);
   });
 
   it('不正な base64url は ImportFormatError をスローする', async () => {
-    await expect(decompressFromShareString('v1:!!!invalid!!!')).rejects.toThrow(ImportFormatError);
+    await expect(decompressFromShareString('h1:!!!invalid!!!')).rejects.toThrow(ImportFormatError);
   });
 
   it('正常な base64url だが解凍できないデータは ImportFormatError をスローする', async () => {
     const garbage = btoa('not compressed').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-    await expect(decompressFromShareString('v1:' + garbage)).rejects.toThrow(ImportFormatError);
+    await expect(decompressFromShareString('h1:' + garbage)).rejects.toThrow(ImportFormatError);
   });
 
   it('元の JSON より文字列が短い（圧縮効果あり）', async () => {

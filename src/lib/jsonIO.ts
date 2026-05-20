@@ -47,7 +47,7 @@ export function parseImport(text: string): Kindergarten[] {
   if (!Array.isArray(obj.kindergartens)) {
     throw new ImportFormatError('kindergartens 配列がありません');
   }
-  // 詳細フィールドのバリデーションは Phase 1 では行わない（Zod 等の導入は Phase 2 以降）。
+  // 詳細フィールドのバリデーションは v1 では行わない（Zod 等の導入は v2 以降）。
   // 最小限の必須キーのみ確認。
   for (const k of obj.kindergartens) {
     if (!k || typeof k !== 'object') {
@@ -87,7 +87,7 @@ export function defaultExportFileName(date = new Date()): string {
 
 // ---- 共有文字列（deflate-raw 圧縮 + base64url）----
 
-const SHARE_PREFIX = 'v1:';
+const SHARE_PREFIX = 'h1:';
 
 // Chromium の (De)CompressionStream は readable を消費しないと writer.write/close が
 // バックプレッシャで待ち続けるため、書き込みと並行して readable をドレインする必要がある。
