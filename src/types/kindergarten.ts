@@ -1,5 +1,5 @@
 // 保育園見学記録のデータモデル。
-// 紙の記録表（doc/planning/report.jpg）に準拠し、ほぼ全フィールドを optional/nullable で保持する。
+// 紙の記録表に準拠し、ほぼ全フィールドを optional/nullable で保持する。
 // 全項目空欄でも保存可能とするため、必須は id / createdAt / updatedAt のみ。
 // 各フィールドの形式・選択肢は doc/planning/requirements.md 4.1.1 を参照。
 
