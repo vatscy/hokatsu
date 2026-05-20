@@ -28,6 +28,12 @@ dist-ssr
 # Vite cache
 .vite
 
+# Vite が vite.config.ts を読み込む際に生成する一時ファイル
+vite.config.ts.timestamp-*
+vite.config.js.timestamp-*
+vite.config.mts.timestamp-*
+vite.config.mjs.timestamp-*
+
 # TypeScript build info
 *.tsbuildinfo
 
