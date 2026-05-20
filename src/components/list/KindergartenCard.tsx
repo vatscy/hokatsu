@@ -34,7 +34,7 @@ export function KindergartenCard({ record, onDelete }: Props) {
       <div className="flex gap-2 mt-1">
         <Link
           to={`/edit/${record.id}`}
-          className="min-h-11 px-3 py-2 rounded-md bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
+          className="inline-flex items-center justify-center min-h-11 px-3 py-2 rounded-md bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
         >
           編集
         </Link>
@@ -45,7 +45,7 @@ export function KindergartenCard({ record, onDelete }: Props) {
               onDelete(record.id);
             }
           }}
-          className="min-h-11 px-3 py-2 rounded-md border border-rose-300 text-rose-600 text-sm hover:bg-rose-50"
+          className="inline-flex items-center justify-center min-h-11 px-3 py-2 rounded-md border border-rose-300 text-rose-600 text-sm hover:bg-rose-50"
         >
           削除
         </button>
