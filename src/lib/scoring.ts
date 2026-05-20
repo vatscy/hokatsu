@@ -35,7 +35,10 @@ export function compareKindergartens(
   key: CompareKey,
 ): number {
   if (key === 'name') {
-    return (a.name ?? '').localeCompare(b.name ?? '', 'ja');
+    if (!a.name && !b.name) return 0;
+    if (!a.name) return 1;
+    if (!b.name) return -1;
+    return a.name.localeCompare(b.name, 'ja');
   }
   if (key === 'visitedAt') {
     return compareNullableString(a.visitedAt, b.visitedAt);
