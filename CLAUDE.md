@@ -54,6 +54,11 @@
 
 - Chromium の `CompressionStream` / `DecompressionStream` は readable を並行消費しないと `writer.write()` がバックプレッシャでハングする（Node では発生しない）。書き込みとドレインを並行にすること。実装は [src/lib/jsonIO.ts](src/lib/jsonIO.ts) の `pipeThroughTransform` を参照。低レイヤの回帰テストは [e2e/compression-stream-backpressure.spec.ts](e2e/compression-stream-backpressure.spec.ts)。
 
+## テスト実行の注意
+
+- `npm run test` はフォアグラウンドで timeout を **120 秒以上**に設定して実行する。`pool: 'forks'` 設定済みでも、まれに worker 起動が遅延して `Timeout waiting for worker to respond` エラーになる。その場合は再実行で通る。
+- Bash ツールでバックグラウンド実行する場合（`run_in_background: true`）、出力確認は `TaskOutput` ツールより **`Read` でファイルパスを直接読む方が確実**（TaskOutput スキーマのロードが不要になる）。
+
 ## テストの方針
 
 - **ユニットテスト**: Vitest + Testing Library + jsdom。`src/**/*.test.ts(x)` をソースと同居配置。
