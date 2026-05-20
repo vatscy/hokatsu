@@ -11,7 +11,7 @@ test('設定画面: 共有文字列をコピーが成功しクリップボード
 
   await page.getByRole('button', { name: '共有文字列をコピー' }).click();
 
-  await expect(page.getByText(/共有文字列をコピーしました/)).toBeVisible({ timeout: 5000 });
+  await expect(page.getByRole('button', { name: 'コピー完了' })).toBeVisible({ timeout: 5000 });
 
   const clipText = await page.evaluate(() => navigator.clipboard.readText());
   expect(clipText).toMatch(/^v1:/);

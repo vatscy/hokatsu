@@ -77,9 +77,23 @@ export function SettingsPage() {
     if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current);
     setMessage(null);
     setCopyState('copying');
+
+    // iOS Safari は writeText の前に await を挟むと user activation が失効して
+    // NotAllowedError になる。ClipboardItem の値として Promise<Blob> を渡すと
+    // Safari は clipboard.write の user activation を Promise 解決まで延長する。
+    const blobPromise = getShareString().then(
+      (text) => new Blob([text], { type: 'text/plain' }),
+    );
+
     try {
-      const text = await getShareString();
-      await navigator.clipboard.writeText(text);
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'text/plain': blobPromise }),
+        ]);
+      } else {
+        const blob = await blobPromise;
+        await navigator.clipboard.writeText(await blob.text());
+      }
       setCopyState('copied');
       copyTimerRef.current = setTimeout(() => setCopyState('idle'), 2000);
     } catch (err) {
