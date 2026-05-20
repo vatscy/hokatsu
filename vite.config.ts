@@ -10,7 +10,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     css: false,
-    pool: 'threads',
+    // Windows + Node 26 では threads pool で worker timeout が頻発するため forks を使う。
+    pool: 'forks',
     exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
   },
 });

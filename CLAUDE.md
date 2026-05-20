@@ -44,6 +44,15 @@
 1. `npx tsc --noEmit` が通る
 2. `npm run test` が通る
 3. UI 変更を伴う場合は `npm run dev` で実ブラウザ動作を確認した旨を明示する（型・テストは UI 正しさを保証しない）
+4. ブラウザ API を新規利用または挙動変更した場合は、`e2e/` に Playwright 回帰テストを足したことを明示する（下記「ブラウザ API を扱う変更の追加ルール」参照）
+
+## ブラウザ API を扱う変更の追加ルール
+
+`CompressionStream` / `DecompressionStream` / `Clipboard` / `IndexedDB` / `File System Access` / `FileReader` などのブラウザ API を新規利用または挙動変更する場合、**Vitest（jsdom + Node）の Pass を実ブラウザ動作の根拠にしない**。Node 実装と Chromium 実装でバックプレッシャ・権限・タイミングが異なるため、`e2e/` に Playwright spec で回帰テストを必ず足すこと。
+
+既知の落とし穴:
+
+- Chromium の `CompressionStream` / `DecompressionStream` は readable を並行消費しないと `writer.write()` がバックプレッシャでハングする（Node では発生しない）。書き込みとドレインを並行にすること。実装は [src/lib/jsonIO.ts](src/lib/jsonIO.ts) の `pipeThroughTransform` を参照。低レイヤの回帰テストは [e2e/compression-stream-backpressure.spec.ts](e2e/compression-stream-backpressure.spec.ts)。
 
 ## テストの方針
 
