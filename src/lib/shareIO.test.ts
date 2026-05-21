@@ -62,7 +62,53 @@ describe('compressToShareString / decompressFromShareString', () => {
     const shareStr = await compressToShareString(records);
     expect(shareStr.length).toBeLessThan(JSON.stringify(records).length);
   });
+
+  // 旧フォーマット ({ appName, version, kindergartens }) の h1: 文字列が
+  // 互換切れにより新 parser で必ず拒否されることを検証する。
+  it('旧フォーマット ({appName, version, kindergartens}) の h1: は ImportFormatError', async () => {
+    const legacyJson = JSON.stringify({
+      appName: 'hokatsu',
+      version: 1,
+      exportedAt: '2024-01-01T00:00:00.000Z',
+      kindergartens: [
+        { id: 'r1', createdAt: '2024-01-01T00:00:00.000Z', updatedAt: '2024-01-01T00:00:00.000Z' },
+      ],
+    });
+    const legacyShareStr = await buildLegacyH1(legacyJson);
+    await expect(decompressFromShareString(legacyShareStr)).rejects.toThrow(ImportFormatError);
+  });
 });
+
+// 旧形式の h1: 文字列をテスト目的で組み立てるヘルパ（shareIO.ts の内部処理を最小限再現）。
+async function buildLegacyH1(json: string): Promise<string> {
+  const cs = new CompressionStream('deflate-raw');
+  const writer = cs.writable.getWriter();
+  const writeDone = (async () => {
+    await writer.write(new TextEncoder().encode(json));
+    await writer.close();
+  })();
+  const chunks: Uint8Array[] = [];
+  const reader = cs.readable.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+  }
+  await writeDone;
+  const total = chunks.reduce((s, c) => s + c.length, 0);
+  const bytes = new Uint8Array(total);
+  let off = 0;
+  for (const c of chunks) {
+    bytes.set(c, off);
+    off += c.length;
+  }
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 8192) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+  }
+  const b64url = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  return 'h1:' + b64url;
+}
 
 describe('defaultShareFileName', () => {
   it('指定日付から .txt ファイル名を生成する', () => {

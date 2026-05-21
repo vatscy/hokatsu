@@ -1,25 +1,22 @@
 import type { Kindergarten } from '../types/kindergarten';
+import {
+  ImportFormatError,
+  compactKindergarten,
+  expandKindergarten,
+} from './shareCodec';
 
-const APP_NAME = 'hokatsu';
-const FORMAT_VERSION = 1;
+export { ImportFormatError };
+
 const SHARE_PREFIX = 'h1:';
 
-export class ImportFormatError extends Error {}
-
+// 共有文字列の内部構造。短縮表現の Kindergarten 配列のみ。
+// プレフィックス `h1:` がフォーマット識別子を兼ねるため、JSON 側にメタ情報は持たない。
 interface ExportPayload {
-  appName: typeof APP_NAME;
-  version: typeof FORMAT_VERSION;
-  exportedAt: string;
-  kindergartens: Kindergarten[];
+  k: ReturnType<typeof compactKindergarten>[];
 }
 
 function buildExportPayload(records: Kindergarten[]): ExportPayload {
-  return {
-    appName: APP_NAME,
-    version: FORMAT_VERSION,
-    exportedAt: new Date().toISOString(),
-    kindergartens: records,
-  };
+  return { k: records.map(compactKindergarten) };
 }
 
 function parseEnvelope(text: string): Kindergarten[] {
@@ -29,36 +26,14 @@ function parseEnvelope(text: string): Kindergarten[] {
   } catch {
     throw new ImportFormatError('JSON として解釈できません');
   }
-  if (!data || typeof data !== 'object') {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw new ImportFormatError('JSON のトップレベルがオブジェクトではありません');
   }
   const obj = data as Record<string, unknown>;
-  if (obj.appName !== APP_NAME) {
-    throw new ImportFormatError(`appName が "${APP_NAME}" ではありません`);
+  if (!Array.isArray(obj.k)) {
+    throw new ImportFormatError('k 配列がありません');
   }
-  if (obj.version !== FORMAT_VERSION) {
-    throw new ImportFormatError(
-      `version ${FORMAT_VERSION} のみ対応です（受領: ${String(obj.version)}）`,
-    );
-  }
-  if (!Array.isArray(obj.kindergartens)) {
-    throw new ImportFormatError('kindergartens 配列がありません');
-  }
-  for (const k of obj.kindergartens) {
-    if (!k || typeof k !== 'object') {
-      throw new ImportFormatError('kindergartens の要素が不正です');
-    }
-    const rec = k as Record<string, unknown>;
-    if (typeof rec.id !== 'string' || rec.id.length === 0) {
-      throw new ImportFormatError('kindergartens の各要素に id (string) が必要です');
-    }
-    if (typeof rec.createdAt !== 'string' || typeof rec.updatedAt !== 'string') {
-      throw new ImportFormatError(
-        'kindergartens の各要素に createdAt / updatedAt (string) が必要です',
-      );
-    }
-  }
-  return obj.kindergartens as Kindergarten[];
+  return obj.k.map((item) => expandKindergarten(item));
 }
 
 // ---- 共有文字列（deflate-raw 圧縮 + base64url）----

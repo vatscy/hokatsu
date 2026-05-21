@@ -14,6 +14,7 @@
 - **フォーム入力は [src/components/form/fields/](src/components/form/fields/) のプリミティブを再利用**。素の `<input>` を新規に書かない。
 - **紙の記録表とセクション構造を 1:1 対応**させる（[src/components/form/sections/](src/components/form/sections/)）。セクションの分割・統合は要求書側の構造変更が先。
 - **共有文字列インポートは「全件上書き」のみ**。マージ実装は v3 まで凍結。JSON 直接の入出力 API は v1 から廃止済み（共有文字列に一本化）。
+- **共有文字列フォーマットは [src/lib/shareCodec.ts](src/lib/shareCodec.ts) を一次情報**とする。`Kindergarten` 型を変更したら同ファイルの `KINDERGARTEN_KEY_MAP`（および対応するネスト型 `*_MAP`）を同 PR で必ず追従させる。漏れたら `satisfies` で型エラーになる。enum 値を増やしたときの数値コードテーブル追加は手動なので注意。
 - **`Kindergarten` 型を変更したら**、[doc/planning/requirements.md](doc/planning/requirements.md) §6 のスナップショットを同じ PR 内で更新する。実装が正、ドキュメントが追従。
 
 ## ディレクトリ責務
