@@ -47,3 +47,6 @@ vite.config.mjs.timestamp-*
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Claude Code (スキル実行時の一時ファイル)
+.claude/scheduled_tasks.lock
