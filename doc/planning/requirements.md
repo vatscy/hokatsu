@@ -260,8 +260,6 @@ v1 で実装した JSON 入出力を「夫婦間の共有」に耐えられる�
 
 [src/types/kindergarten.ts](../../src/types/kindergarten.ts) を正とする。本節はそのスナップショット（変更時は実装側を更新後、こちらも追従）。
 
-> NOTE: 本ドキュメントの定義と実装側 `kindergarten.ts` の現状にギャップがある場合は、後続の実装タスクで本ドキュメントに合わせて更新する（駅から距離、駐輪場、給食の自園調理、布団、SNS、各セクションメモ、園内活動→日常運用への統合）。
-
 - 必須は `id` / `createdAt` / `updatedAt` のみ。それ以外はすべて optional で「空欄保存可」を担保。
 - 日付は `YYYY-MM-DD`、時刻は `HH:mm`、休園期間の月日は `MM/DD` 形式の文字列。
 - `Rating` は `1 | 2 | 3 | 4 | 5 | null`。
@@ -470,10 +468,15 @@ interface Kindergarten {
 - **PWA のオフライン時データの整合性**: 複数デバイスでオフライン編集された場合のマージ戦略。
 - **既存紙記録の移行**: 件数次第では v2 完了を待たず、v1 のメモ欄に貼り付けるだけの簡易移行も選択肢。
 - **1日のスケジュール入力UI**: v1 では時間帯ごとの自由記述に簡略化する方針（4.1.1 参照）。タイムラインバー風の UI は v2 以降で検討。
-- **技術スタック**: 未決定。GitHub Pages 上の静的 SPA 前提で、v1 を 2週間で出すには軽量構成が現実的。候補:
-  - Vite + React + TypeScript + IndexedDB ラッパ（idb / Dexie）
-  - PWA 化は `vite-plugin-pwa` 等で対応
-  - 状態管理は最小限（Zustand / React Context）
+- **技術スタック（v1 採用構成）**:
+  - Vite + React 19 + TypeScript
+  - Dexie（IndexedDB ラッパ）
+  - Zustand（最小限の状態管理）
+  - Tailwind CSS v4
+  - react-router-dom（HashRouter）
+  - Vitest + Testing Library + jsdom（単体テスト）
+  - Playwright / Chromium（E2E）
+  - PWA 化（`vite-plugin-pwa` 等）は v2 設計時に再評価
 - **GitHub Pages デプロイ運用（v1-v2）**: `main` ブランチへの push をトリガに GitHub Actions でビルド → `gh-pages` ブランチへデプロイする構成を想定。
 - **v2 → v3 移行時の作業**:
   - public リポジトリ → private リポジトリへの移行手段（既存リポジトリの可視性変更 or 新規 private リポジトリへミラー）
@@ -485,7 +488,17 @@ interface Kindergarten {
 
 ## 8. 次のステップ
 
-1. 本要求整理を確認・修正
-2. 技術スタック選定（v1 を 2週間で出せる構成）
-3. v1 の画面設計（入力フォーム / 一覧）
-4. 実装開始
+### v1 完了状況（2026-05 時点）
+
+- 紙の記録表全項目の入力フォーム（7セクション）実装済み
+- 一覧の並び替え：見学日 / 印象評価平均 / 園名 / 家からの距離（km・分）
+- IndexedDB 保存 / JSON エクスポート・インポート（全件上書き）
+- 共有文字列機能（deflate-raw + base64url、`h1:` 形式）
+- GitHub Pages へ自動デプロイ（HashRouter）
+
+### v2 着手の判断条件
+
+- 紙記録の手入力移行を進めて件数が増し、レーダーチャート／横並び比較で意思決定が変わると感じた時点
+- スマホでオフライン状況下の入力ニーズが顕在化した時点（PWA 化）
+
+### v3 / v4 は要件 §3 の方針を継続

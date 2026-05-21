@@ -14,6 +14,7 @@
 - **フォーム入力は [src/components/form/fields/](src/components/form/fields/) のプリミティブを再利用**。素の `<input>` を新規に書かない。
 - **紙の記録表とセクション構造を 1:1 対応**させる（[src/components/form/sections/](src/components/form/sections/)）。セクションの分割・統合は要求書側の構造変更が先。
 - **JSON インポートは「全件上書き」のみ**。マージ実装は v3 まで凍結。
+- **`Kindergarten` 型を変更したら**、[doc/planning/requirements.md](doc/planning/requirements.md) §6 のスナップショットを同じ PR 内で更新する。実装が正、ドキュメントが追従。
 
 ## ディレクトリ責務
 

@@ -3,16 +3,34 @@
 保育園見学の所感を記録・比較するためのローカル動作 SPA。
 要求整理は [doc/planning/requirements.md](doc/planning/requirements.md) を参照。
 
+公開 URL: https://vatscy.github.io/hokatsu/
+
 ## v1 (MVP) でできること
 
 - 紙の記録表に準拠した全項目入力（折りたたみセクション）
 - 園の登録・編集・削除
-- 一覧表示（並び替え: 見学日 / 印象評価平均 / 園名）
+- 一覧表示（並び替え: 見学日 / 印象評価平均 / 園名 / 家からの距離（km・分））
 - ブラウザローカル保存（IndexedDB）
 - JSON エクスポート / インポート（全件上書き）
+- 文字列でデータ共有（短縮文字列 `h1:...` をクリップボード経由で別端末へ移行）
 - スマホ・PC 両対応のレスポンシブ UI
 
 PWA / オフライン対応 / レーダーチャート / Google Drive 同期は v2 以降。
+
+## 開発コマンド
+
+| 用途 | コマンド |
+|---|---|
+| 開発サーバ | `npm run dev` |
+| 型チェック | `npx tsc --noEmit` |
+| 単発テスト | `npm run test` |
+| 監視テスト | `npm run test:watch` |
+| 本番ビルド | `npm run build` |
+| プレビュー | `npm run preview` |
+| E2E テスト | `npm run e2e`（dev サーバ自動起動） |
+| E2E (UI) | `npm run e2e:ui` |
+
+初回のみ Playwright のブラウザ取得が必要: `npx playwright install chromium`。
 
 ## セットアップ
 
@@ -49,6 +67,7 @@ npm run preview
 
 - データはブラウザの IndexedDB（DB 名 `hokatsu`）にのみ保存される。
 - 端末を変える場合・ブラウザのデータをクリアする前は、**設定ページから JSON エクスポート**でバックアップする。
+- 別端末への即時移行は **設定ページの「文字列で共有」** を使うと、LINE 等のテキストでデータを渡せる（インポート完了後は自動で一覧画面へ戻る）。
 - インポートは「全件上書き」のみ（v3 でマージ対応予定）。
 
 ## 技術スタック
@@ -58,6 +77,8 @@ npm run preview
 - Zustand
 - Tailwind CSS v4
 - react-router-dom (HashRouter)
+- Vitest + Testing Library + jsdom（単体テスト）
+- Playwright / Chromium（E2E テスト）
 
 ## ディレクトリ
 
@@ -68,6 +89,7 @@ src/
 ├─ lib/                    id 生成 / スコア計算 / JSON I/O / フォーマット
 ├─ stores/                 Zustand ストア
 ├─ pages/                  ListPage / NewPage / EditPage / SettingsPage
+├─ test/                   Vitest セットアップ（fake-indexeddb 等）
 └─ components/
    ├─ layout/              Header / Container
    ├─ list/                KindergartenCard / SortSelector
@@ -76,4 +98,5 @@ src/
       ├─ Section.tsx       折りたたみ <details>
       ├─ fields/           汎用入力プリミティブ
       └─ sections/         紙記録表セクションに 1:1 対応
+e2e/                       Playwright spec（*.spec.ts）
 ```
