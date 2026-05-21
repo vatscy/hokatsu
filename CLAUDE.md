@@ -13,14 +13,14 @@
 - **IndexedDB は `src/db/database.ts` の repository 経由**でのみ操作する。Dexie インスタンスを各コンポーネントから直接触らない。
 - **フォーム入力は [src/components/form/fields/](src/components/form/fields/) のプリミティブを再利用**。素の `<input>` を新規に書かない。
 - **紙の記録表とセクション構造を 1:1 対応**させる（[src/components/form/sections/](src/components/form/sections/)）。セクションの分割・統合は要求書側の構造変更が先。
-- **JSON インポートは「全件上書き」のみ**。マージ実装は v3 まで凍結。
+- **共有文字列インポートは「全件上書き」のみ**。マージ実装は v3 まで凍結。JSON 直接の入出力 API は v1 から廃止済み（共有文字列に一本化）。
 - **`Kindergarten` 型を変更したら**、[doc/planning/requirements.md](doc/planning/requirements.md) §6 のスナップショットを同じ PR 内で更新する。実装が正、ドキュメントが追従。
 
 ## ディレクトリ責務
 
 - [src/types/](src/types/) — `Kindergarten` 型・定数
 - [src/db/](src/db/) — Dexie インスタンス + repository
-- [src/lib/](src/lib/) — id 生成 / スコア計算 / JSON I/O / フォーマット（純関数のみ）
+- [src/lib/](src/lib/) — id 生成 / スコア計算 / 共有文字列 I/O / フォーマット（純関数のみ）
 - [src/stores/](src/stores/) — Zustand ストア
 - [src/pages/](src/pages/) — ListPage / NewPage / EditPage / SettingsPage
 - [src/components/](src/components/) — layout / list / form
@@ -53,7 +53,7 @@
 
 既知の落とし穴:
 
-- Chromium の `CompressionStream` / `DecompressionStream` は readable を並行消費しないと `writer.write()` がバックプレッシャでハングする（Node では発生しない）。書き込みとドレインを並行にすること。実装は [src/lib/jsonIO.ts](src/lib/jsonIO.ts) の `pipeThroughTransform` を参照。低レイヤの回帰テストは [e2e/compression-stream-backpressure.spec.ts](e2e/compression-stream-backpressure.spec.ts)。
+- Chromium の `CompressionStream` / `DecompressionStream` は readable を並行消費しないと `writer.write()` がバックプレッシャでハングする（Node では発生しない）。書き込みとドレインを並行にすること。実装は [src/lib/shareIO.ts](src/lib/shareIO.ts) の `pipeThroughTransform` を参照。低レイヤの回帰テストは [e2e/compression-stream-backpressure.spec.ts](e2e/compression-stream-backpressure.spec.ts)。
 
 ## テスト実行の注意
 

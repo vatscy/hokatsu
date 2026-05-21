@@ -53,38 +53,6 @@ describe('useKindergartensStore', () => {
     expect(result.current.sortDir).toBe('asc');
   });
 
-  it('exportJson: パース可能なJSONを返す', async () => {
-    const { result } = renderHook(() => useKindergartensStore());
-    await act(() => result.current.create({ name: 'エクスポート園' }));
-    let json = '';
-    await act(async () => { json = await result.current.exportJson(); });
-    const parsed = JSON.parse(json);
-    expect(parsed.appName).toBe('hokatsu');
-    expect(parsed.kindergartens).toHaveLength(1);
-  });
-
-  it('importJson: 正常なJSONでlistを置換し件数を返す', async () => {
-    const { result } = renderHook(() => useKindergartensStore());
-    const json = JSON.stringify({
-      appName: 'hokatsu',
-      version: 1,
-      exportedAt: '',
-      kindergartens: [
-        { id: 'imp-1', createdAt: '2024-01-01T00:00:00.000Z', updatedAt: '2024-01-01T00:00:00.000Z', name: 'インポート園' },
-      ],
-    });
-    let ret = { count: 0 };
-    await act(async () => { ret = await result.current.importJson(json); });
-    expect(ret.count).toBe(1);
-    expect(result.current.list).toHaveLength(1);
-    expect(result.current.list[0].id).toBe('imp-1');
-  });
-
-  it('importJson: 不正なJSONはエラーをthrowする', async () => {
-    const { result } = renderHook(() => useKindergartensStore());
-    await expect(act(() => result.current.importJson('invalid'))).rejects.toThrow();
-  });
-
   it('clearAll: listを空にする', async () => {
     const { result } = renderHook(() => useKindergartensStore());
     await act(() => result.current.create({}));

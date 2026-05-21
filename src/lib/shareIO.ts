@@ -2,15 +2,18 @@ import type { Kindergarten } from '../types/kindergarten';
 
 const APP_NAME = 'hokatsu';
 const FORMAT_VERSION = 1;
+const SHARE_PREFIX = 'h1:';
 
-export interface ExportPayload {
+export class ImportFormatError extends Error {}
+
+interface ExportPayload {
   appName: typeof APP_NAME;
   version: typeof FORMAT_VERSION;
   exportedAt: string;
   kindergartens: Kindergarten[];
 }
 
-export function buildExportPayload(records: Kindergarten[]): ExportPayload {
+function buildExportPayload(records: Kindergarten[]): ExportPayload {
   return {
     appName: APP_NAME,
     version: FORMAT_VERSION,
@@ -19,13 +22,7 @@ export function buildExportPayload(records: Kindergarten[]): ExportPayload {
   };
 }
 
-export function serializeExport(records: Kindergarten[]): string {
-  return JSON.stringify(buildExportPayload(records), null, 2);
-}
-
-export class ImportFormatError extends Error {}
-
-export function parseImport(text: string): Kindergarten[] {
+function parseEnvelope(text: string): Kindergarten[] {
   let data: unknown;
   try {
     data = JSON.parse(text);
@@ -47,8 +44,6 @@ export function parseImport(text: string): Kindergarten[] {
   if (!Array.isArray(obj.kindergartens)) {
     throw new ImportFormatError('kindergartens 配列がありません');
   }
-  // 詳細フィールドのバリデーションは v1 では行わない（Zod 等の導入は v2 以降）。
-  // 最小限の必須キーのみ確認。
   for (const k of obj.kindergartens) {
     if (!k || typeof k !== 'object') {
       throw new ImportFormatError('kindergartens の要素が不正です');
@@ -66,28 +61,7 @@ export function parseImport(text: string): Kindergarten[] {
   return obj.kindergartens as Kindergarten[];
 }
 
-export function downloadJsonFile(text: string, fileName: string): void {
-  const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-export function defaultExportFileName(date = new Date()): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `hokatsu-${y}${m}${d}.json`;
-}
-
 // ---- 共有文字列（deflate-raw 圧縮 + base64url）----
-
-const SHARE_PREFIX = 'h1:';
 
 // Chromium の (De)CompressionStream は readable を消費しないと writer.write/close が
 // バックプレッシャで待ち続けるため、書き込みと並行して readable をドレインする必要がある。
@@ -182,5 +156,36 @@ export async function decompressFromShareString(text: string): Promise<Kindergar
   } catch {
     throw new ImportFormatError('展開（inflate）に失敗しました（文字列が破損している可能性があります）');
   }
-  return parseImport(new TextDecoder().decode(decompressed));
+  return parseEnvelope(new TextDecoder().decode(decompressed));
+}
+
+// ---- ファイル入出力（共有文字列をそのまま .txt として扱う）----
+
+export function downloadShareFile(text: string, fileName: string): void {
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export function defaultShareFileName(date = new Date()): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `hokatsu-${y}${m}${d}.txt`;
+}
+
+// アップロードされた .txt ファイルから共有文字列を抽出する。
+// 余分な前後空白や改行は許容する（メーラ等で折り返されたケースを救う）。
+export function extractShareStringFromFileText(text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith(SHARE_PREFIX)) {
+    throw new ImportFormatError(`共有文字列は "${SHARE_PREFIX}" で始まる必要があります`);
+  }
+  return trimmed.replace(/\s+/g, '');
 }

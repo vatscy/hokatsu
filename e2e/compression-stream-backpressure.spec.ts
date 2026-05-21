@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 // Chromium の CompressionStream のバックプレッシャ仕様を低レイヤで検証する回帰テスト。
 //
 // 「readable を消費する前に await writer.write(...) を呼ぶとハングする」ことが
-// jsonIO 側のバグ（共有文字列コピーが何も起きない）の根因だったため、
+// shareIO 側のバグ（共有文字列コピーが何も起きない）の根因だったため、
 // その挙動が将来も変わらない（= 並行ドレインが必要）ことをこのテストで保護する。
 //
 // この挙動は Node の CompressionStream では発生しないため Vitest では検知できない。
