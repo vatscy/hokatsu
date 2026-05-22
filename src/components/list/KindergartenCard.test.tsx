@@ -68,4 +68,53 @@ describe('KindergartenCard', () => {
     expect(onDelete).not.toHaveBeenCalled();
     vi.restoreAllMocks();
   });
+
+  it('初期状態は閉じており、詳細データは表示されない', () => {
+    renderCard({ ...baseRecord(), generalMemo: '備考メモ' });
+    const header = screen.getByRole('button', { expanded: false });
+    expect(header).toBeInTheDocument();
+    expect(screen.queryByText('備考メモ')).not.toBeInTheDocument();
+  });
+
+  it('ヘッダクリックで展開し、詳細データが表示される。再クリックで閉じる', async () => {
+    const user = userEvent.setup();
+    renderCard({ ...baseRecord(), generalMemo: '備考メモ' });
+    const header = screen.getByRole('button', { expanded: false });
+
+    await user.click(header);
+    expect(screen.getByRole('button', { expanded: true })).toBe(header);
+    expect(screen.getByText('備考メモ')).toBeInTheDocument();
+
+    await user.click(header);
+    expect(screen.getByRole('button', { expanded: false })).toBe(header);
+    expect(screen.queryByText('備考メモ')).not.toBeInTheDocument();
+  });
+
+  it('Enter キーでもヘッダを開閉できる', async () => {
+    const user = userEvent.setup();
+    renderCard({ ...baseRecord(), generalMemo: '備考メモ' });
+    const header = screen.getByRole('button', { expanded: false });
+    header.focus();
+    await user.keyboard('{Enter}');
+    expect(screen.getByText('備考メモ')).toBeInTheDocument();
+  });
+
+  it('編集リンク・削除ボタンを押してもアコーディオンは開閉しない', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    renderCard(baseRecord());
+
+    await user.click(screen.getByRole('link', { name: '編集' }));
+    expect(screen.getByRole('button', { name: '削除' })).toBeInTheDocument();
+    // ヘッダ button は閉じたまま
+    expect(
+      screen.getByRole('button', { expanded: false, name: /テスト保育園/ }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '削除' }));
+    expect(
+      screen.getByRole('button', { expanded: false, name: /テスト保育園/ }),
+    ).toBeInTheDocument();
+    vi.restoreAllMocks();
+  });
 });

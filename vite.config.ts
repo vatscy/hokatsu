@@ -7,6 +7,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
     environment: 'jsdom',
+    // jsdom はデフォルト URL が about:blank の opaque origin で localStorage を提供しないため、
+    // 明示的に http URL を指定して localStorage を有効化する（並び替え設定の永続化テストで必要）。
+    environmentOptions: { jsdom: { url: 'http://localhost/' } },
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     css: false,

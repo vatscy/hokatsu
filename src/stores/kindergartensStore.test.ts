@@ -5,6 +5,8 @@ import { db } from '../db/database';
 
 beforeEach(async () => {
   await db.kindergartens.clear();
+  // Node 26 では globalThis.localStorage が experimental 実装で未提供のため window 経由でクリアする。
+  window.localStorage.clear();
   // replace=true にするとメソッドが消えるため merge モードでデータ部分のみリセット
   useKindergartensStore.setState({ list: [], loaded: false, sortKey: 'visitedAt', sortDir: 'desc' });
 });
@@ -51,6 +53,18 @@ describe('useKindergartensStore', () => {
     act(() => result.current.setSort('name', 'asc'));
     expect(result.current.sortKey).toBe('name');
     expect(result.current.sortDir).toBe('asc');
+  });
+
+  it('setSort: 並び替え設定は localStorage に永続化される', () => {
+    const { result } = renderHook(() => useKindergartensStore());
+    act(() => result.current.setSort('averageImpression', 'asc'));
+    const raw = window.localStorage.getItem('hokatsu-list-prefs');
+    expect(raw).not.toBeNull();
+    const persisted = JSON.parse(raw!);
+    expect(persisted.state).toEqual({ sortKey: 'averageImpression', sortDir: 'asc' });
+    // list / loaded は決して永続化しないこと
+    expect(persisted.state).not.toHaveProperty('list');
+    expect(persisted.state).not.toHaveProperty('loaded');
   });
 
   it('clearAll: listを空にする', async () => {
