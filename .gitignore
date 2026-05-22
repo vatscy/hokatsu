@@ -1,3 +1,7 @@
+# Temporary files
+.tmp/
+*.tmp
+
 # Logs
 logs
 *.log
@@ -48,5 +52,6 @@ vite.config.mjs.timestamp-*
 /blob-report/
 /playwright/.cache/
 
-# Claude Code (スキル実行時の一時ファイル)
+# Claude Code
 .claude/scheduled_tasks.lock
+.claude/settings.local.json
