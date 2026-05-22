@@ -56,6 +56,10 @@
 
 - Chromium の `CompressionStream` / `DecompressionStream` は readable を並行消費しないと `writer.write()` がバックプレッシャでハングする（Node では発生しない）。書き込みとドレインを並行にすること。実装は [src/lib/shareIO.ts](src/lib/shareIO.ts) の `pipeThroughTransform` を参照。低レイヤの回帰テストは [e2e/compression-stream-backpressure.spec.ts](e2e/compression-stream-backpressure.spec.ts)。
 
+### テスト環境の localStorage
+
+[src/test/setup.ts](src/test/setup.ts) で in-memory な `Storage` 互換実装を `window.localStorage` / `globalThis.localStorage` に注入している。jsdom@29 は `window.localStorage` を提供せず（環境オプションで `url: 'http://localhost/'` を渡しても解消しない）、Node 26 内蔵の `globalThis.localStorage` も `--localstorage-file` 未指定で常に undefined を返すため。zustand persist 等の永続化テストはこの polyfill に依存しているので削除しない。
+
 ## テスト実行の注意
 
 - `npm run test` はフォアグラウンドで実行する。所要時間はおおむね 10〜15 秒。
