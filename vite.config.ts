@@ -1,10 +1,30 @@
 import { defineConfig } from 'vitest/config';
+import type { Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+const APP_VERSION = process.env.VITE_APP_VERSION ?? 'dev';
+
+// dist/version.json をビルド時に発行する。クライアントはこれを no-store fetch して
+// 自身に埋め込まれた __APP_VERSION__ と比較し、変化したら更新バナーを表示する。
+const emitVersionJson = (): Plugin => ({
+  name: 'emit-version-json',
+  apply: 'build',
+  generateBundle() {
+    this.emitFile({
+      type: 'asset',
+      fileName: 'version.json',
+      source: JSON.stringify({ version: APP_VERSION }),
+    });
+  },
+});
+
 export default defineConfig({
   base: process.env.VITE_BASE_PATH ?? '/',
-  plugins: [react(), tailwindcss()],
+  define: {
+    __APP_VERSION__: JSON.stringify(APP_VERSION),
+  },
+  plugins: [react(), tailwindcss(), emitVersionJson()],
   test: {
     environment: 'jsdom',
     // jsdom はデフォルト URL が about:blank の opaque origin で localStorage を提供しないため、

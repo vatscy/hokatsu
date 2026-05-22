@@ -33,6 +33,9 @@ jobs:
           # GitHub Pages のサブパス配信に合わせて base を切り替える。
           # リポジトリ名が hokatsu でない場合はここを変更すること。
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          # クライアントに埋め込むビルド識別子。dist/version.json と
+          # 突き合わせて更新バナーを表示するために使う。
+          VITE_APP_VERSION: ${{ github.sha }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
