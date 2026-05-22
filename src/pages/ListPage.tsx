@@ -48,7 +48,7 @@ export function ListPage() {
           右上の「新規登録」から追加できます。
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-start">
           {sorted.map((record) => (
             <KindergartenCard key={record.id} record={record} onDelete={remove} />
           ))}
